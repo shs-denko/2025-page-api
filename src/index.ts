@@ -12,7 +12,14 @@ const sessions: WSContext[] = [];
 
 mongoose.connect(mongoUrl).then(() => {
   console.log("MongoDB connected");
-  Deno.serve(app.fetch);
+  Deno.serve({
+    port: 8101
+  },app.fetch);
+});
+
+app.get("/notes/", async (c) => {
+  const posts = await Post.find();
+  return c.json(posts);
 });
 
 app.get(
@@ -21,19 +28,6 @@ app.get(
     return {
       onOpen: async (event, ws) => {
         sessions.push(ws);
-        const posts = await Post.find();
-        ws.send(
-          JSON.stringify({
-            type: "init",
-            posts: posts.map((post) => ({
-              x: post.x,
-              y: post.y,
-              content: post.content,
-              color: post.color,
-              id: post.id,
-            })),
-          }),
-        )
       },
       onMessage: async (event, ws) => {
         let text;
