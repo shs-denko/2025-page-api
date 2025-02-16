@@ -13,8 +13,8 @@ const sessions: WSContext[] = [];
 mongoose.connect(mongoUrl).then(() => {
   console.log("MongoDB connected");
   Deno.serve({
-    port: 8101
-  },app.fetch);
+    port: 8101,
+  }, app.fetch);
 });
 
 app.get("/notes/", async (c) => {
@@ -43,7 +43,10 @@ app.get(
         const data = JSON.parse(text);
         if (data.type === "create") {
           const id = uuidv4();
-          if (!data.note.x || !data.note.y || !data.note.content || !data.note.color) {
+          if (
+            !data.note.x || !data.note.y || !data.note.content ||
+            !data.note.color
+          ) {
             ws.send(JSON.stringify({ type: "error", message: "Invalid data" }));
             return;
           }
@@ -62,7 +65,7 @@ app.get(
             content: data.note.content,
             color: data.note.color,
             id,
-          }
+          };
           await Post.create(note);
           sessions.forEach((session) => {
             session.send(
@@ -75,7 +78,10 @@ app.get(
           return;
         }
         if (data.type === "move") {
-          if (data.note.x === undefined || data.note.y === undefined || !data.note.id) {
+          if (
+            data.note.x === undefined || data.note.y === undefined ||
+            !data.note.id
+          ) {
             ws.send(JSON.stringify({ type: "error", message: "Invalid data" }));
             return;
           }
