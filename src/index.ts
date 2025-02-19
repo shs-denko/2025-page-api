@@ -40,7 +40,13 @@ app.get(
         } else {
           text = "";
         }
-        const data = JSON.parse(text);
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (e) {
+          ws.send(JSON.stringify({ type: "error", message: "Invalid JSON" }));
+          return;
+        }
         if (data.type === "create") {
           const id = uuidv4();
           if (
